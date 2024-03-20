@@ -21,7 +21,7 @@ namespace WebApplicationHospital
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
-        public byte[] Photo { get; set; }
+        public byte[] PatientPhoto { get; set; }
 
         public Patient() { }
 
@@ -40,7 +40,7 @@ namespace WebApplicationHospital
 
             if (patientData[10] != DBNull.Value)
             {
-                Photo = (byte[])patientData[10];
+                PatientPhoto = (byte[])patientData[10];
             }
         }
 
@@ -48,7 +48,7 @@ namespace WebApplicationHospital
 
     internal class APIReader
     {
-        private static readonly string url = "http://172.20.10.7:5181";
+        private static readonly string url = "http://192.168.0.103:5181";
         private static readonly HttpClient client = SettingHttpClient();
 
         public static HttpClient SettingHttpClient()
@@ -94,6 +94,23 @@ namespace WebApplicationHospital
             {
                 await client.GetAsync(url);
                 return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public static async Task<bool> UpdatePatient(Patient patient)
+        {
+            if (!await canConnectToAPI())
+                return false;
+
+            try
+            {
+                await Console.Out.WriteLineAsync(Newtonsoft.Json.JsonConvert.SerializeObject(patient));
+                HttpResponseMessage response = await client.PutAsJsonAsync(url + $"/Patient/Put/{patient.Id_Patient}", Newtonsoft.Json.JsonConvert.SerializeObject(patient));
+                return response.IsSuccessStatusCode;
             }
             catch (Exception)
             {
