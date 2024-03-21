@@ -21,7 +21,7 @@ namespace WebApplicationHospital
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
-        public byte[] PatientPhoto { get; set; }
+        public string PatientPhoto { get; set; }
 
         public Patient() { }
 
@@ -40,10 +40,10 @@ namespace WebApplicationHospital
 
             if (patientData[10] != DBNull.Value)
             {
-                PatientPhoto = (byte[])patientData[10];
+                byte[] varbinaryData = (byte[])patientData[10];
+                PatientPhoto = Convert.ToBase64String(varbinaryData);
             }
         }
-
     }
 
     internal class APIReader
@@ -101,15 +101,30 @@ namespace WebApplicationHospital
             }
         }
 
-        public static async Task<bool> UpdatePatient(Patient patient)
+        public static async Task<bool> updatePatient(Patient patient)
         {
             if (!await canConnectToAPI())
                 return false;
 
             try
             {
-                await Console.Out.WriteLineAsync(Newtonsoft.Json.JsonConvert.SerializeObject(patient));
-                HttpResponseMessage response = await client.PutAsJsonAsync(url + $"/Patient/Put/{patient.Id_Patient}", Newtonsoft.Json.JsonConvert.SerializeObject(patient));
+                HttpResponseMessage response = await client.PutAsJsonAsync(url + $"/Patient/Put/{patient.Id_Patient}", patient);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public static async Task<bool> addPatient(Patient patient)
+        {
+            if (!await canConnectToAPI())
+                return false;
+
+            try
+            {
+                HttpResponseMessage response = await client.PostAsJsonAsync(url + $"/Patient/Post", patient);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception)

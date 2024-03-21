@@ -59,9 +59,10 @@ namespace WindowsFormsApp1
                 List<object[]> responsePatients = DataBaseWorker.ExecuteQueryObject($"SELECT * FROM Patients WHERE Id_Patient = 1", 11); ;
                 Patient p = new Patient(responsePatients[0]);
 
-                if(await APIReader.UpdatePatient(p))
+                if(await APIReader.addPatient(p))
                 {
-                    using (MemoryStream ms = new MemoryStream(p.PatientPhoto))
+                    byte[] photoBytes = Convert.FromBase64String(p.PatientPhoto);
+                    using (MemoryStream ms = new MemoryStream(photoBytes))
                     {
                         Image image = Image.FromStream(ms);
                         pictureBox1.Image = image;
@@ -69,15 +70,15 @@ namespace WindowsFormsApp1
                 }
             }
 
-            //try
-            //{
-            //    File.Delete(imagePath);
-            //    Console.WriteLine("Файл успешно удален.");
-            //}
-            //catch (IOException ex)
-            //{
-            //    Console.WriteLine($"Ошибка при удалении файла: {ex.Message}");
-            //}
+            try
+            {
+                File.Delete(imagePath);
+                Console.WriteLine("Файл успешно удален.");
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"Ошибка при удалении файла: {ex.Message}");
+            }
         }
     }
 }
